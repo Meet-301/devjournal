@@ -1,0 +1,68 @@
+datasource db {
+    provider = "postgresql"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id String @id @default(uuid())
+    name String
+    username String @unique
+    email String @unique
+    password String
+    profilePhoto String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    journals JournalEntry[]
+    searches SearchHistory[]
+}
+
+model JournalEntry {
+    id String @id @default(uuid())
+    userId String
+    title String
+    content String
+    summary String?
+    date DateTime @default(now())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    tags Tag[]
+    questions Question[]
+
+    @@index([userId, date])
+}
+
+model Tag {
+    id String @id
+    entryId String
+    title String
+
+    entries JournalEntry[]
+}
+
+model SearchHistory {
+    id String @id
+    userId String
+    title String
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model Question {
+    id String @id
+    entryId String
+    title String
+    answer String
+
+    entry JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+    @@index([entryId])
+}
